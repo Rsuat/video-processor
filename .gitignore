@@ -1,0 +1,13 @@
+venv/
+dist/
+build/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.spec
+.env
+.idea/
+.vscode/
+*.mp4
+!test*.mp4

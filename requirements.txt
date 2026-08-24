@@ -1,0 +1,6 @@
+opencv-python
+pillow
+PyQt6
+numpy
+ffmpeg-python
+pyinstaller
