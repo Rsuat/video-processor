@@ -8,48 +8,59 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest]
-
+  build-windows:
+    runs-on: windows-latest
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Set up Python
+    - name: Set up Python 3.10
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
+        python-version: '3.10'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
         pip install pyinstaller
+        pip install -r requirements.txt
 
-    - name: Download FFmpeg (Windows)
-      if: matrix.os == 'windows-latest'
+    - name: Build with PyInstaller
       run: |
-        Invoke-WebRequest -Uri "https://github.com/GyanD/codexffmpeg/releases/download/2023-11-20-git-740702d765/ffmpeg-2023-11-20-git-740702d765-full_build.zip" -OutFile "ffmpeg.zip"
-        Expand-Archive -Path ffmpeg.zip -DestinationPath ffmpeg_extracted
-        Copy-Item -Path "ffmpeg_extracted\*\bin\ffmpeg.exe" -Destination ".\ffmpeg.exe"
-        Remove-Item ffmpeg.zip
-        Remove-Item -Recurse -Force ffmpeg_extracted
+        pyinstaller --onefile --noconsole --name VideoProcessor main.py
 
-    - name: Build with PyInstaller (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        pyinstaller --noconsole --onefile --name "VideoEditor" main.py
-
-    - name: Build with PyInstaller (Windows)
-      if: matrix.os == 'windows-latest'
-      run: |
-        pyinstaller --noconsole --onefile --add-binary "ffmpeg.exe;." --name "VideoEditor" main.py
-
-    - name: Upload Artifacts
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: VideoEditor-${{ matrix.os }}
-        path: dist/*
+        name: VideoProcessor-Windows
+        path: dist/VideoProcessor.exe
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Install system dependencies
+      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx
+
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyinstaller
+        pip install -r requirements.txt
+
+    - name: Build with PyInstaller
+      run: |
+        pyinstaller --onefile --noconsole --name VideoProcessor main.py
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: VideoProcessor-Debian
+        path: dist/VideoProcessor
