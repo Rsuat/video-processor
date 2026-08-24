@@ -41,8 +41,10 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Install system dependencies
-      run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-glx
+    - name: Install Linux Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libgl1 libglib2.0-0
 
     - name: Set up Python 3.10
       uses: actions/setup-python@v5
